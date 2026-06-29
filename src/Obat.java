@@ -1,3 +1,9 @@
+/*
+ * Obat.java - Redesign UI Modern Apotek
+ * Fitur: Placeholder, animasi button (ripple), gradient header,
+ *        card panel shadow, focus border, tabel striped modern
+ */
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
@@ -12,7 +18,7 @@ public class Obat extends javax.swing.JFrame {
         java.util.logging.Logger.getLogger(Obat.class.getName());
 
     // ═══════════════════════════════════════════════
-    // Warna apotek
+    // PALET WARNA MODERN APOTEK
     // ═══════════════════════════════════════════════
     private static final Color C_PRIMARY       = new Color(22, 101, 52);
     private static final Color C_TAMBAH        = new Color(21, 128, 61);
@@ -33,7 +39,7 @@ public class Obat extends javax.swing.JFrame {
     DefaultTableModel model;
 
     // ═══════════════════════════════════════════════
-    // Placeholder teks field
+    // PLACEHOLDER TEXT FIELD
     // ═══════════════════════════════════════════════
     private static class PlaceholderTextField extends JTextField {
         private final String placeholder;
@@ -80,7 +86,7 @@ public class Obat extends javax.swing.JFrame {
     }
 
     // ═══════════════════════════════════════════════
-    // Animasi tombol 
+    // ANIMATED BUTTON (Ripple + Hover + Press)
     // ═══════════════════════════════════════════════
     private static class AnimatedButton extends JButton {
         private final Color baseColor, hoverColor;
@@ -163,7 +169,7 @@ public class Obat extends javax.swing.JFrame {
     }
 
     // ═══════════════════════════════════════════════
-    // Card panel (garis tepi + bayangan)
+    // CARD PANEL (rounded + shadow)
     // ═══════════════════════════════════════════════
     private static class CardPanel extends JPanel {
         CardPanel() { setOpaque(false); }
@@ -184,7 +190,7 @@ public class Obat extends javax.swing.JFrame {
     }
 
     // ═══════════════════════════════════════════════
-    // Header warna hijau
+    // HEADER PANEL (gradient hijau)
     // ═══════════════════════════════════════════════
     private static class HeaderPanel extends JPanel {
         HeaderPanel() { setOpaque(false); setPreferredSize(new Dimension(0,90)); }
@@ -202,7 +208,7 @@ public class Obat extends javax.swing.JFrame {
     }
 
     // ═══════════════════════════════════════════════
-    // Round border
+    // ROUND BORDER
     // ═══════════════════════════════════════════════
     private static class RoundBorder extends AbstractBorder {
         private final Color color; private final int thickness, radius;
@@ -217,7 +223,7 @@ public class Obat extends javax.swing.JFrame {
     }
 
     // ═══════════════════════════════════════════════
-    // Style field
+    // STYLE FIELD
     // ═══════════════════════════════════════════════
     private void styleField(PlaceholderTextField tf) {
         tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -235,9 +241,10 @@ public class Obat extends javax.swing.JFrame {
     }
 
     // ═══════════════════════════════════════════════
-    // Komponen
+    // KOMPONEN
     // ═══════════════════════════════════════════════
-    private PlaceholderTextField kode_obat, nama_obat, id_kategori, kode_satuan;
+    private PlaceholderTextField kode_obat, nama_obat;
+    private JComboBox<String> cb_kategori, cb_satuan;
     private AnimatedButton btntambah, btnedit, btnhapus, btnreset;
     private JTable tabel;
     private JScrollPane jScrollPane1;
@@ -248,17 +255,19 @@ public class Obat extends javax.swing.JFrame {
         setMinimumSize(new Dimension(760, 580));
 
         kode_obat   = new PlaceholderTextField("Contoh: OBT001");
-        nama_obat   = new PlaceholderTextField("Masukkan nama obat");
-        id_kategori = new PlaceholderTextField("Contoh: KAT01");
-        kode_satuan = new PlaceholderTextField("Contoh: PCS / BOX");
+        nama_obat   = new PlaceholderTextField("Masukkan Nama Obat");
+        cb_kategori = new JComboBox<>();
+        cb_satuan   = new JComboBox<>();
 
         btntambah = new AnimatedButton("Tambah", C_TAMBAH, C_TAMBAH_HOVER);
         btnedit   = new AnimatedButton("Edit",   C_EDIT,   C_EDIT_HOVER);
         btnhapus  = new AnimatedButton("Hapus",  C_HAPUS,  C_HAPUS_HOVER);
         btnreset  = new AnimatedButton("Reset",  C_RESET,  C_RESET_HOVER);
 
-        for (PlaceholderTextField tf : new PlaceholderTextField[]{kode_obat,nama_obat,id_kategori,kode_satuan})
-            styleField(tf);
+        styleField(kode_obat);
+        styleField(nama_obat);
+        styleComboBox(cb_kategori);
+        styleComboBox(cb_satuan);
 
         Dimension btnSz = new Dimension(130,38);
         for (AnimatedButton b : new AnimatedButton[]{btntambah,btnedit,btnhapus,btnreset})
@@ -267,7 +276,7 @@ public class Obat extends javax.swing.JFrame {
         tabel = new JTable();
         jScrollPane1 = new JScrollPane(tabel);
 
-        String[] cols = {"Kode Obat","Nama Obat","ID Kategori","Kode Satuan"};
+        String[] cols = {"Kode Obat","Nama Obat","Kategori","Satuan"};
         model = new DefaultTableModel(cols,0) {
             @Override public boolean isCellEditable(int r,int c) { return false; }
         };
@@ -328,8 +337,8 @@ public class Obat extends javax.swing.JFrame {
                 int row = tabel.getSelectedRow(); if (row<0) return;
                 kode_obat.setRealText(model.getValueAt(row,0).toString());
                 nama_obat.setRealText(model.getValueAt(row,1).toString());
-                id_kategori.setRealText(model.getValueAt(row,2).toString());
-                kode_satuan.setRealText(model.getValueAt(row,3).toString());
+                selectComboByValue(cb_kategori, model.getValueAt(row,2).toString());
+                selectComboByValue(cb_satuan,   model.getValueAt(row,3).toString());
                 kode_obat.setEditable(false);
             }
         });
@@ -339,10 +348,61 @@ public class Obat extends javax.swing.JFrame {
         btnhapus.addActionListener(e -> btnhapusAction());
         btnreset.addActionListener(e -> resetForm());
 
+        loadKategori();
+        loadSatuan();
         buildUI();
         tampilkan();
         pack();
         setLocationRelativeTo(null);
+    }
+
+
+    private void styleComboBox(JComboBox<String> cb) {
+        cb.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        cb.setBackground(Color.WHITE);
+        cb.setForeground(new Color(15, 23, 42));
+        cb.setPreferredSize(new Dimension(210, 36));
+        Border normalCb = BorderFactory.createCompoundBorder(
+            new RoundBorder(new Color(187,247,208),1,8), BorderFactory.createEmptyBorder(2,8,2,8));
+        Border focusCb  = BorderFactory.createCompoundBorder(
+            new RoundBorder(new Color(22,163,74),2,8), BorderFactory.createEmptyBorder(2,8,2,8));
+        cb.setBorder(normalCb);
+        cb.addFocusListener(new FocusAdapter() {
+            @Override public void focusGained(FocusEvent e) { cb.setBorder(focusCb); }
+            @Override public void focusLost(FocusEvent e)   { cb.setBorder(normalCb); }
+        });
+    }
+
+    private void loadKategori() {
+        cb_kategori.removeAllItems();
+        cb_kategori.addItem("-- Pilih Kategori --");
+        try (Connection cn=getConnection();
+             ResultSet rs=cn.createStatement().executeQuery("SELECT id_kategori, nama_kategori FROM kategori ORDER BY nama_kategori")) {
+            while (rs.next())
+                cb_kategori.addItem(rs.getString("id_kategori")+" - "+rs.getString("nama_kategori"));
+        } catch (SQLException ex) { logger.log(java.util.logging.Level.SEVERE,null,ex); }
+    }
+
+    private void loadSatuan() {
+        cb_satuan.removeAllItems();
+        cb_satuan.addItem("-- Pilih Satuan --");
+        try (Connection cn=getConnection();
+             ResultSet rs=cn.createStatement().executeQuery("SELECT kode_satuan, nama_satuan FROM satuan ORDER BY nama_satuan")) {
+            while (rs.next())
+                cb_satuan.addItem(rs.getString("kode_satuan")+" - "+rs.getString("nama_satuan"));
+        } catch (SQLException ex) { logger.log(java.util.logging.Level.SEVERE,null,ex); }
+    }
+
+    private void selectComboByValue(JComboBox<String> cb, String value) {
+        for (int i=0; i<cb.getItemCount(); i++) {
+            if (cb.getItemAt(i).contains(value)) { cb.setSelectedIndex(i); return; }
+        }
+    }
+
+    private String getKodeFromCombo(JComboBox<String> cb) {
+        String sel = (String) cb.getSelectedItem();
+        if (sel==null || sel.startsWith("--")) return "";
+        return sel.split(" - ")[0].trim();
     }
 
     private void buildUI() {
@@ -407,8 +467,8 @@ public class Obat extends javax.swing.JFrame {
 
         JLabel l3=new JLabel("Kode Obat"); l3.setFont(lf); l3.setForeground(lc);
         JLabel l4=new JLabel("Nama Obat"); l4.setFont(lf); l4.setForeground(lc);
-        JLabel l5=new JLabel("ID Kategori"); l5.setFont(lf); l5.setForeground(lc);
-        JLabel l6=new JLabel("Kode Satuan"); l6.setFont(lf); l6.setForeground(lc);
+        JLabel l5=new JLabel("Kategori");    l5.setFont(lf); l5.setForeground(lc);
+        JLabel l6=new JLabel("Satuan");      l6.setFont(lf); l6.setForeground(lc);
 
         gc.gridx=0; gc.gridy=0; gc.weightx=0; card.add(l3,gc);
         gc.gridx=1; gc.weightx=1; card.add(kode_obat,gc);
@@ -416,9 +476,9 @@ public class Obat extends javax.swing.JFrame {
         gc.gridx=3; gc.weightx=1; card.add(nama_obat,gc);
 
         gc.gridx=0; gc.gridy=1; gc.weightx=0; card.add(l5,gc);
-        gc.gridx=1; gc.weightx=1; card.add(id_kategori,gc);
+        gc.gridx=1; gc.weightx=1; card.add(cb_kategori,gc);
         gc.gridx=2; gc.weightx=0; card.add(l6,gc);
-        gc.gridx=3; gc.weightx=1; card.add(kode_satuan,gc);
+        gc.gridx=3; gc.weightx=1; card.add(cb_satuan,gc);
 
         JPanel btnPnl = new JPanel(new FlowLayout(FlowLayout.CENTER,12,0));
         btnPnl.setOpaque(false);
@@ -448,9 +508,16 @@ public class Obat extends javax.swing.JFrame {
     // DB CRUD
     // ═══════════════════════════════════════════════
     private boolean inputValid() {
-        if (kode_obat.getRealText().isEmpty()||nama_obat.getRealText().isEmpty()||
-            id_kategori.getRealText().isEmpty()||kode_satuan.getRealText().isEmpty()) {
-            JOptionPane.showMessageDialog(this,"Semua field harus diisi!","Peringatan",JOptionPane.WARNING_MESSAGE);
+        if (kode_obat.getRealText().isEmpty() || nama_obat.getRealText().isEmpty()) {
+            JOptionPane.showMessageDialog(this,"Kode dan nama obat harus diisi!","Peringatan",JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (getKodeFromCombo(cb_kategori).isEmpty()) {
+            JOptionPane.showMessageDialog(this,"Pilih kategori terlebih dahulu!","Peringatan",JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (getKodeFromCombo(cb_satuan).isEmpty()) {
+            JOptionPane.showMessageDialog(this,"Pilih satuan terlebih dahulu!","Peringatan",JOptionPane.WARNING_MESSAGE);
             return false;
         }
         return true;
@@ -459,10 +526,15 @@ public class Obat extends javax.swing.JFrame {
     private void tampilkan() {
         model.setRowCount(0);
         try (Connection cn=getConnection();
-             ResultSet rs=cn.createStatement().executeQuery("SELECT * FROM obat")) {
+             ResultSet rs=cn.createStatement().executeQuery(
+                 "SELECT o.kode_obat, o.nama_obat, k.nama_kategori, s.nama_satuan " +
+                 "FROM obat o " +
+                 "JOIN kategori k ON o.id_kategori = k.id_kategori " +
+                 "JOIN satuan s ON o.kode_satuan = s.kode_satuan")) {
             while (rs.next())
-                model.addRow(new String[]{rs.getString("kode_obat"),rs.getString("nama_obat"),
-                                          rs.getString("id_kategori"),rs.getString("kode_satuan")});
+                model.addRow(new String[]{
+                    rs.getString("kode_obat"), rs.getString("nama_obat"),
+                    rs.getString("nama_kategori"), rs.getString("nama_satuan")});
         } catch (SQLException ex) { logger.log(java.util.logging.Level.SEVERE,null,ex); }
     }
 
@@ -476,7 +548,7 @@ public class Obat extends javax.swing.JFrame {
              PreparedStatement ps=cn.prepareStatement(
                  "INSERT INTO obat (kode_obat,nama_obat,id_kategori,kode_satuan) VALUES(?,?,?,?)")) {
             ps.setString(1,kode_obat.getRealText()); ps.setString(2,nama_obat.getRealText());
-            ps.setString(3,id_kategori.getRealText()); ps.setString(4,kode_satuan.getRealText());
+            ps.setString(3,getKodeFromCombo(cb_kategori)); ps.setString(4,getKodeFromCombo(cb_satuan));
             ps.executeUpdate();
             JOptionPane.showMessageDialog(this,"Data berhasil ditambahkan!","Sukses",JOptionPane.INFORMATION_MESSAGE);
             tampilkan(); resetForm();
@@ -494,8 +566,8 @@ public class Obat extends javax.swing.JFrame {
         try (Connection cn=getConnection();
              PreparedStatement ps=cn.prepareStatement(
                  "UPDATE obat SET nama_obat=?,id_kategori=?,kode_satuan=? WHERE kode_obat=?")) {
-            ps.setString(1,nama_obat.getRealText()); ps.setString(2,id_kategori.getRealText());
-            ps.setString(3,kode_satuan.getRealText()); ps.setString(4,kode_obat.getRealText());
+            ps.setString(1,nama_obat.getRealText()); ps.setString(2,getKodeFromCombo(cb_kategori));
+            ps.setString(3,getKodeFromCombo(cb_satuan)); ps.setString(4,kode_obat.getRealText());
             ps.executeUpdate();
             JOptionPane.showMessageDialog(this,"Data berhasil diupdate!","Sukses",JOptionPane.INFORMATION_MESSAGE);
             tampilkan(); resetForm();
@@ -526,7 +598,7 @@ public class Obat extends javax.swing.JFrame {
 
     private void resetForm() {
         kode_obat.clearField(); nama_obat.clearField();
-        id_kategori.clearField(); kode_satuan.clearField();
+        cb_kategori.setSelectedIndex(0); cb_satuan.setSelectedIndex(0);
         kode_obat.setEditable(true);
         tabel.clearSelection();
     }
